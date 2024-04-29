@@ -1,26 +1,28 @@
 const express = require('express')
+require('dotenv').config();
 const mongoose = require('mongoose')
 const ShortURL = require('./models/shortUrls')
 const app = express()
 
-mongoose.connect('mongodb://127.0.0.1:27017/urlShortener')
+const connectionString = process.env.CONNECTION_STRING
+mongoose.connect(connectionString)
 
 app.set('view engine', 'ejs');
-app.use(express.urlencoded({extended: false}))
+app.use(express.urlencoded({ extended: false }))
 
 app.get("/", async (req, res) => {
     const shortUrls = await ShortURL.find();
-    res.render('index', {shortUrls: shortUrls});
+    res.render('index', { shortUrls: shortUrls });
 })
 
 app.post("/shortURLs", async (req, res) => {
-    await ShortURL.create({full: req.body.fullURL})
+    await ShortURL.create({ full: req.body.fullURL })
 
     res.redirect('/');
 })
 
-app.get("/:shortUrl", async(req, res) => {
-    const shortUrl = await ShortURL.findOne({short: req.params.shortUrl});
+app.get("/:shortUrl", async (req, res) => {
+    const shortUrl = await ShortURL.findOne({ short: req.params.shortUrl });
     if (shortUrl === null) return res.sendStatus(404);
 
     shortUrl.clicks++;
